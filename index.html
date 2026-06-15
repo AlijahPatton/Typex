@@ -1,0 +1,1818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Typex</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Rounded:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --y:#FFE000;--yd:#C8AA00;
+  --orange:#F97316;
+  --black:#0A0A0A;--surface:#131313;--surface2:#1a1a1a;
+  --border:#1e1e1e;--border2:#252525;
+  --dim:#666;--dim2:#444;
+  --white:#fff;--wrong:#f33;
+}
+html,body{height:100%;background:var(--black);color:var(--white);
+  font-family:'DM Sans',sans-serif;letter-spacing:-.03em;-webkit-font-smoothing:antialiased;}
+.ms{font-family:'Material Symbols Rounded';
+  font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24;
+  user-select:none;line-height:1;display:inline-block;}
+
+/* ── SCREENS ── */
+.screen{display:none;min-height:100vh;flex-direction:column;}
+.screen.active{display:flex;}
+
+/* ── SHARED NAV ── */
+nav{display:flex;align-items:center;justify-content:space-between;
+  padding:16px 40px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.logo{display:flex;align-items:center;gap:8px;font-size:18px;
+  font-weight:800;letter-spacing:-.05em;color:var(--y);cursor:pointer;}
+.logo .ms{font-size:22px;}
+.nav-right{display:flex;gap:8px;}
+.nav-btn{display:flex;align-items:center;gap:6px;background:transparent;
+  border:1px solid var(--border2);color:var(--dim);
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;
+  letter-spacing:-.03em;padding:8px 14px;border-radius:10px;cursor:pointer;transition:all .15s;}
+.nav-btn .ms{font-size:16px;}
+.nav-btn:hover{border-color:var(--y);color:var(--y);}
+.nav-btn.active{background:var(--y);border-color:var(--y);color:var(--black);}
+
+/* ── LANDING ── */
+#screen-landing nav{border-bottom:none;padding:20px 48px;}
+.landing-body{flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;padding:40px 24px;text-align:center;}
+.landing-tag{display:inline-flex;align-items:center;gap:6px;
+  background:var(--surface2);border:1px solid var(--border2);border-radius:100px;
+  padding:6px 14px;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--dim);margin-bottom:28px;}
+.landing-tag .ms{font-size:14px;color:var(--y);}
+.landing-h1{font-size:clamp(48px,8vw,88px);font-weight:900;letter-spacing:-.06em;
+  line-height:.95;margin-bottom:20px;}
+.landing-h1 span{color:var(--y);}
+.landing-sub{font-size:16px;font-weight:400;color:var(--dim);letter-spacing:-.02em;
+  max-width:420px;line-height:1.6;margin-bottom:40px;}
+.landing-actions{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-bottom:56px;}
+.btn-xl{display:flex;align-items:center;gap:8px;padding:14px 28px;border-radius:14px;
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;letter-spacing:-.03em;
+  cursor:pointer;border:none;transition:all .15s;}
+.btn-xl .ms{font-size:20px;}
+.btn-xl-y{background:var(--y);color:var(--black);}
+.btn-xl-y:hover{background:var(--yd);}
+.btn-xl-g{background:var(--surface2);color:var(--white);border:1.5px solid var(--border2);}
+.btn-xl-g:hover{border-color:#3a3a3a;background:#222;}
+.btn-xl-ghost{background:transparent;color:var(--dim);border:1.5px solid var(--border);}
+.btn-xl-ghost:hover{color:var(--white);border-color:#3a3a3a;}
+.landing-features{display:flex;gap:32px;flex-wrap:wrap;justify-content:center;}
+.feat{display:flex;align-items:center;gap:8px;font-size:13px;
+  color:var(--dim2);font-weight:500;letter-spacing:-.01em;}
+.feat .ms{font-size:16px;color:var(--dim);}
+.landing-footer{padding:20px 48px;border-top:1px solid var(--border);
+  text-align:center;font-size:12px;color:var(--dim2);}
+
+/* ── AUTH SCREENS ── */
+.auth-body{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 24px;}
+.auth-card{background:var(--surface);border:1.5px solid var(--border);border-radius:24px;
+  padding:40px;width:420px;max-width:100%;}
+.auth-icon{width:48px;height:48px;background:var(--y);border-radius:14px;
+  display:flex;align-items:center;justify-content:center;margin-bottom:20px;}
+.auth-icon .ms{font-size:26px;color:var(--black);}
+.auth-h2{font-size:24px;font-weight:800;letter-spacing:-.05em;margin-bottom:4px;}
+.auth-sub{font-size:14px;color:var(--dim);letter-spacing:-.02em;margin-bottom:28px;}
+.auth-sub a{color:var(--y);text-decoration:none;font-weight:600;cursor:pointer;}
+.auth-sub a:hover{text-decoration:underline;}
+.field{margin-bottom:16px;}
+.field label{display:block;font-size:12px;font-weight:600;letter-spacing:.04em;
+  text-transform:uppercase;color:var(--dim2);margin-bottom:6px;}
+.field input{width:100%;background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:12px;padding:12px 16px;color:var(--white);
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:400;
+  letter-spacing:-.02em;outline:none;transition:border-color .15s;}
+.field input:focus{border-color:#333;}
+.field input::placeholder{color:var(--dim2);}
+.field-row{display:flex;gap:12px;}
+.field-row .field{flex:1;}
+.auth-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:13px;border-radius:12px;background:var(--y);color:var(--black);
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:700;letter-spacing:-.03em;
+  border:none;cursor:pointer;transition:all .15s;margin-top:4px;}
+.auth-btn:hover{background:var(--yd);}
+.auth-btn .ms{font-size:18px;}
+.auth-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--dim2);font-size:12px;}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+.auth-guest{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;
+  padding:12px;border-radius:12px;background:transparent;color:var(--dim);
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;letter-spacing:-.02em;
+  border:1.5px solid var(--border);cursor:pointer;transition:all .15s;}
+.auth-guest:hover{border-color:#333;color:var(--white);}
+.auth-guest .ms{font-size:16px;}
+.auth-error{display:none;align-items:center;gap:7px;padding:10px 14px;
+  border-radius:10px;background:#1f0d0d;border:1px solid #3a1a1a;
+  color:#f88;font-size:13px;font-weight:500;margin-bottom:16px;}
+.auth-error.show{display:flex;}
+.auth-error .ms{font-size:16px;flex-shrink:0;}
+.auth-terms{font-size:11px;color:var(--dim2);text-align:center;margin-top:16px;line-height:1.5;}
+
+/* ── APP (main practice screen) ── */
+#screen-app{background:var(--black);}
+.app-nav-user{display:flex;align-items:center;gap:6px;
+  padding:5px 5px 5px 12px;border-radius:100px;border:1px solid var(--border2);
+  font-size:13px;font-weight:600;letter-spacing:-.02em;color:var(--dim);}
+.app-nav-user .ms{font-size:16px;}
+.user-avatar{width:26px;height:26px;border-radius:50%;background:var(--y);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:800;color:var(--black);letter-spacing:0;flex-shrink:0;}
+.owner-badge{display:none;align-items:center;gap:6px;flex-shrink:0;
+  padding:6px 14px;border-radius:100px;
+  background:rgba(249,115,22,.12);border:1px solid rgba(249,115,22,.45);
+  color:var(--orange);font-size:12px;font-weight:700;
+  letter-spacing:.06em;text-transform:uppercase;}
+.owner-badge.show{display:flex;}
+.owner-badge .ms{font-size:15px;}
+
+main{flex:1;display:flex;flex-direction:column;align-items:center;
+  padding:44px 40px 36px;max-width:920px;margin:0 auto;width:100%;}
+
+/* ── STATS ── */
+.stats-bar{display:flex;align-items:center;gap:24px;margin-bottom:32px;width:100%;}
+.stat{display:flex;flex-direction:column;gap:2px;}
+.stat-val{font-size:28px;font-weight:800;letter-spacing:-.05em;
+  color:var(--y);line-height:1;font-variant-numeric:tabular-nums;}
+.stat-label{font-size:10px;font-weight:600;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--dim2);}
+.sdiv{width:1px;height:30px;background:var(--border);flex-shrink:0;}
+.spacer{flex:1;}
+
+/* ── TIMER RING ── */
+.timer-ring{position:relative;width:48px;height:48px;flex-shrink:0;}
+.timer-ring svg{width:48px;height:48px;transform:rotate(-90deg);}
+.timer-ring circle{fill:none;stroke-width:3;}
+.ring-bg{stroke:#1e1e1e;}
+.ring-fg{stroke:var(--y);stroke-linecap:round;
+  stroke-dasharray:138;stroke-dashoffset:0;transition:stroke-dashoffset 1s linear;}
+.timer-center{position:absolute;inset:0;display:flex;align-items:center;
+  justify-content:center;font-size:13px;font-weight:800;letter-spacing:-.04em;color:var(--y);}
+
+/* ── MODE CHIPS ── */
+.mode-section{width:100%;margin-bottom:28px;}
+.mode-row{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.mode-row+.mode-row{margin-top:6px;}
+.chip{display:flex;align-items:center;gap:5px;padding:7px 13px;
+  border-radius:100px;border:1px solid #1e1e1e;background:transparent;
+  font-family:'DM Sans',sans-serif;font-size:12px;font-weight:600;
+  letter-spacing:-.02em;color:var(--dim);cursor:pointer;transition:all .15s;white-space:nowrap;}
+.chip .ms{font-size:14px;}
+.chip:hover{border-color:#3a3a3a;color:var(--white);}
+.chip.active{background:var(--y);border-color:var(--y);color:var(--black);}
+.chip.special{border-color:#1e2a1e;}
+.chip.special:hover{border-color:#2e4a2e;color:#5f5;}
+.chip.special.active{background:#22c55e;border-color:#22c55e;color:#000;}
+.chip.chaos-chip{border-color:#2a1e1e;}
+.chip.chaos-chip:hover{border-color:#4a2e2e;color:#f88;}
+.chip.chaos-chip.active{background:#ef4444;border-color:#ef4444;color:#fff;}
+.chip.zen-chip.active{background:#818cf8;border-color:#818cf8;color:#fff;}
+.chip.custom-chip.active{background:#f59e0b;border-color:#f59e0b;color:#000;}
+.mode-divider{width:1px;height:20px;background:var(--border);flex-shrink:0;}
+.mode-label{font-size:10px;font-weight:600;letter-spacing:.07em;
+  text-transform:uppercase;color:var(--dim2);padding:0 4px;}
+
+/* ── CUSTOM PANEL ── */
+.custom-panel{width:100%;margin-bottom:16px;display:none;}
+.custom-panel.show{display:block;}
+.custom-panel textarea{width:100%;background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:14px;padding:18px 20px;color:var(--white);
+  font-family:'DM Sans',sans-serif;font-size:15px;font-weight:400;
+  letter-spacing:-.02em;line-height:1.6;resize:vertical;min-height:90px;
+  outline:none;transition:border-color .2s;}
+.custom-panel textarea:focus{border-color:#2e2e2e;}
+.custom-panel textarea::placeholder{color:var(--dim2);}
+.custom-panel-footer{display:flex;justify-content:flex-end;margin-top:8px;}
+
+/* ── TYPING AREA ── */
+.typing-wrapper{width:100%;position:relative;margin-bottom:24px;}
+.typing-box{width:100%;background:var(--surface);border:1.5px solid var(--border);
+  border-radius:18px;padding:32px 36px;cursor:text;
+  transition:border-color .2s;position:relative;overflow:hidden;min-height:110px;}
+.typing-box.focused{border-color:#252525;}
+.typing-box::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--y);transform:scaleX(var(--progress,0));transform-origin:left;transition:transform .08s;}
+.typing-box.zen-mode::before{background:#818cf8;}
+.typing-box.chaos-mode::before{background:#ef4444;}
+.prompt-text{font-size:21px;font-weight:400;letter-spacing:-.03em;
+  line-height:1.75;user-select:none;position:relative;z-index:1;}
+.zen-mode .ch{color:#2a2a2a;}
+.zen-mode .ch.ok{color:var(--white);}
+.zen-mode .ch.bad{color:#2a2a2a;text-decoration:none;}
+.zen-mode .ch.cur::before{background:#818cf8;}
+.chaos-mode .ch.shake{display:inline-block;animation:shake .18s ease-in-out;}
+@keyframes shake{0%,100%{transform:translate(0)}25%{transform:translate(-2px,1px)}75%{transform:translate(2px,-1px)}}
+.ch.scrambled{animation:scrambleflash .25s ease;}
+@keyframes scrambleflash{0%{opacity:.2}100%{opacity:1}}
+.ch{color:#3a3a3a;transition:color .05s;position:relative;}
+.ch.ok{color:var(--white);}
+.ch.bad{color:var(--wrong);text-decoration:underline;text-decoration-color:var(--wrong);}
+.ch.cur::before{content:'';position:absolute;left:-1px;top:4px;bottom:4px;
+  width:2px;background:var(--y);border-radius:2px;animation:blink 1s step-end infinite;}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.numbers-mode .prompt-text{font-weight:700;letter-spacing:.02em;}
+#typing-input{position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0;}
+.click-hint{position:absolute;inset:0;z-index:2;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  font-size:14px;font-weight:600;letter-spacing:-.02em;color:#555;
+  border-radius:18px;background:rgba(8,8,8,.7);
+  backdrop-filter:blur(4px);transition:opacity .2s;cursor:text;}
+.click-hint .ms{font-size:18px;color:var(--y);}
+.click-hint.gone{opacity:0;pointer-events:none;}
+
+/* ── CONTROLS ── */
+.controls{display:flex;align-items:center;gap:10px;width:100%;}
+.ctrl-btn{display:flex;align-items:center;justify-content:center;gap:7px;
+  padding:11px 20px;border-radius:12px;border:none;
+  font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;
+  letter-spacing:-.03em;cursor:pointer;transition:all .15s;}
+.ctrl-btn .ms{font-size:18px;}
+.btn-y{background:var(--y);color:var(--black);}
+.btn-y:hover{background:var(--yd);}
+.btn-g{background:#181818;color:var(--dim);border:1px solid #222;}
+.btn-g:hover{background:#222;color:var(--white);}
+.hint-txt{font-size:12px;color:var(--dim2);letter-spacing:-.01em;margin-left:4px;}
+.hint-txt kbd{display:inline-flex;align-items:center;padding:2px 6px;
+  background:#181818;border:1px solid #272727;border-radius:5px;
+  font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;color:#4a4a4a;}
+
+/* ── RESULT OVERLAY ── */
+.result-overlay{position:fixed;inset:0;background:rgba(0,0,0,.9);
+  backdrop-filter:blur(16px);display:flex;align-items:center;justify-content:center;
+  z-index:200;opacity:0;pointer-events:none;transition:opacity .3s;}
+.result-overlay.show{opacity:1;pointer-events:all;}
+.result-card{background:var(--surface);border:1.5px solid #202020;border-radius:24px;
+  padding:42px;width:460px;max-width:90vw;
+  transform:translateY(16px);transition:transform .3s;overflow-y:auto;max-height:90vh;}
+.result-overlay.show .result-card{transform:translateY(0);}
+.res-tag{font-size:11px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--dim2);margin-bottom:6px;}
+.res-wpm{font-size:74px;font-weight:900;letter-spacing:-.06em;
+  color:var(--y);line-height:1;margin-bottom:2px;}
+.res-sub{font-size:16px;font-weight:400;color:#444;letter-spacing:-.03em;margin-bottom:28px;}
+.res-grid{display:grid;grid-template-columns:1fr 1fr 1fr;
+  gap:1px;background:#1e1e1e;border-radius:12px;overflow:hidden;margin-bottom:26px;}
+.res-metric{background:var(--surface);padding:16px 14px;}
+.res-metric-val{font-size:22px;font-weight:800;letter-spacing:-.04em;}
+.res-metric-key{font-size:10px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--dim2);margin-top:3px;}
+.res-zen-note{font-size:13px;color:#818cf8;letter-spacing:-.02em;margin-bottom:20px;display:none;}
+.res-zen-note.show{display:block;}
+.res-actions{display:flex;gap:10px;}
+.res-actions .ctrl-btn{flex:1;}
+.res-mode-badge{display:inline-flex;align-items:center;gap:5px;
+  padding:4px 10px;border-radius:100px;font-size:11px;font-weight:700;
+  letter-spacing:.04em;text-transform:uppercase;margin-bottom:14px;
+  background:#1a1a1a;border:1px solid #252525;color:var(--dim);}
+.res-mode-badge .ms{font-size:13px;}
+
+/* LB notice */
+.res-lb-notice{display:flex;align-items:center;gap:7px;margin-top:16px;
+  padding:10px 14px;border-radius:10px;font-size:13px;font-weight:500;letter-spacing:-.02em;}
+.res-lb-notice .ms{font-size:16px;flex-shrink:0;}
+.res-lb-notice.eligible{background:#0d1f0d;border:1px solid #1a3a1a;color:#4ade80;}
+.res-lb-notice.ineligible{background:#1a1408;border:1px solid #2e2208;color:#888;}
+.res-lb-notice.ineligible .ms{color:#555;}
+.res-lb-submitted{display:none;align-items:center;gap:7px;margin-top:16px;
+  padding:10px 14px;border-radius:10px;font-size:13px;font-weight:500;
+  background:#0d1f0d;border:1px solid #22c55e;color:#4ade80;}
+.res-lb-submitted.show{display:flex;}
+.res-lb-submitted .ms{font-size:16px;}
+.res-lb-submit-row{display:none;align-items:center;gap:8px;margin-top:14px;}
+.res-lb-submit-row.show{display:flex;}
+.res-lb-submit-row input{flex:1;background:#1a1a1a;border:1px solid #2a2a2a;border-radius:10px;
+  padding:10px 14px;color:var(--white);font-family:'DM Sans',sans-serif;
+  font-size:14px;font-weight:500;letter-spacing:-.02em;outline:none;transition:border-color .15s;}
+.res-lb-submit-row input:focus{border-color:#3a3a3a;}
+.res-lb-submit-row input::placeholder{color:#3a3a3a;}
+.res-lb-submit-row .ctrl-btn{padding:10px 16px;white-space:nowrap;flex-shrink:0;}
+
+/* ── BOTTOM BAR ── */
+.bottom-bar{padding:12px 40px;border-top:1px solid #111;
+  display:flex;align-items:center;justify-content:space-between;
+  font-size:12px;color:var(--dim2);flex-shrink:0;}
+.best-badge{display:flex;align-items:center;gap:5px;
+  background:#101010;border:1px solid var(--border);border-radius:100px;
+  padding:4px 10px;font-size:12px;font-weight:600;color:var(--y);}
+.best-badge .ms{font-size:13px;}
+
+/* ── LEADERBOARD OVERLAY ── */
+.lb-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);
+  backdrop-filter:blur(18px);display:flex;align-items:center;justify-content:center;
+  z-index:300;opacity:0;pointer-events:none;transition:opacity .25s;}
+.lb-overlay.show{opacity:1;pointer-events:all;}
+.lb-card{background:var(--surface);border:1.5px solid #202020;border-radius:24px;
+  width:520px;max-width:92vw;max-height:80vh;display:flex;flex-direction:column;
+  transform:translateY(14px);transition:transform .25s;overflow:hidden;}
+.lb-overlay.show .lb-card{transform:translateY(0);}
+.lb-header{display:flex;align-items:center;gap:10px;padding:24px 28px 20px;
+  border-bottom:1px solid #1a1a1a;flex-shrink:0;}
+.lb-title{font-size:18px;font-weight:800;letter-spacing:-.04em;flex:1;}
+.lb-title span{color:var(--y);}
+.lb-close{display:flex;align-items:center;justify-content:center;
+  width:34px;height:34px;border-radius:8px;background:transparent;border:none;
+  color:var(--dim);cursor:pointer;transition:all .15s;}
+.lb-close:hover{background:#1e1e1e;color:var(--white);}
+.lb-close .ms{font-size:20px;}
+.lb-filters{display:flex;gap:4px;padding:16px 28px 12px;flex-shrink:0;flex-wrap:wrap;}
+.lb-filter{padding:5px 12px;border-radius:100px;border:1px solid #1e1e1e;
+  background:transparent;font-family:'DM Sans',sans-serif;font-size:11px;
+  font-weight:600;letter-spacing:.02em;color:var(--dim);cursor:pointer;transition:all .15s;}
+.lb-filter:hover{border-color:#333;color:var(--white);}
+.lb-filter.active{background:var(--y);border-color:var(--y);color:var(--black);}
+.lb-body{flex:1;overflow-y:auto;padding:0 28px 24px;}
+.lb-body::-webkit-scrollbar{width:4px;}
+.lb-body::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:4px;}
+.lb-empty{text-align:center;padding:48px 0;color:var(--dim2);font-size:14px;}
+.lb-empty .ms{font-size:40px;color:#222;display:block;margin-bottom:12px;}
+.lb-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid #141414;}
+.lb-row:last-child{border-bottom:none;}
+.lb-rank{font-size:13px;font-weight:800;letter-spacing:-.03em;
+  color:var(--dim2);width:24px;flex-shrink:0;text-align:center;}
+.lb-rank.gold{color:#FFD700;}
+.lb-rank.silver{color:#C0C0C0;}
+.lb-rank.bronze{color:#CD7F32;}
+.lb-avatar{width:32px;height:32px;border-radius:50%;background:var(--surface2);
+  border:1px solid #222;display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;color:var(--dim);flex-shrink:0;letter-spacing:0;}
+.lb-name{flex:1;font-size:14px;font-weight:600;letter-spacing:-.02em;}
+.lb-meta{font-size:11px;color:var(--dim2);letter-spacing:.03em;text-transform:uppercase;}
+.lb-wpm{font-size:20px;font-weight:800;letter-spacing:-.04em;color:var(--y);font-variant-numeric:tabular-nums;}
+.lb-wpm-label{font-size:10px;color:var(--dim2);letter-spacing:.05em;text-transform:uppercase;}
+.lb-you{background:#0e0e0e;border-radius:10px;padding:2px 6px;
+  font-size:10px;font-weight:700;color:var(--y);letter-spacing:.04em;
+  text-transform:uppercase;flex-shrink:0;}
+.lb-avatar.has-img,.user-avatar.has-img,.prof-avatar.has-img{background-size:cover;background-position:center;font-size:0;}
+.lb-row{cursor:pointer;}
+.user-avatar{cursor:pointer;}
+
+/* ── PROFILE VIEWER OVERLAY ── */
+.prof-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);
+  backdrop-filter:blur(18px);display:flex;align-items:center;justify-content:center;
+  z-index:400;opacity:0;pointer-events:none;transition:opacity .25s;padding:24px;}
+.prof-overlay.show{opacity:1;pointer-events:all;}
+.prof-card{background:var(--surface);border:1.5px solid #202020;border-radius:24px;
+  width:440px;max-width:100%;max-height:88vh;overflow-y:auto;
+  transform:translateY(14px);transition:transform .25s;}
+.prof-overlay.show .prof-card{transform:translateY(0);}
+.prof-card::-webkit-scrollbar{width:4px;}
+.prof-card::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:4px;}
+.prof-banner{width:100%;height:140px;background:linear-gradient(135deg,#1a1a1a,#222);
+  background-size:cover;background-position:center;position:relative;flex-shrink:0;
+  border-radius:24px 24px 0 0;}
+.prof-close{position:absolute;top:14px;right:14px;display:flex;align-items:center;
+  justify-content:center;width:34px;height:34px;border-radius:8px;
+  background:rgba(0,0,0,.5);border:none;color:var(--white);cursor:pointer;
+  transition:all .15s;backdrop-filter:blur(6px);}
+.prof-close:hover{background:rgba(0,0,0,.75);}
+.prof-close .ms{font-size:20px;}
+.prof-head{display:flex;align-items:flex-end;gap:16px;padding:0 28px;margin-top:-38px;}
+.prof-avatar{width:84px;height:84px;border-radius:50%;background:var(--y);
+  border:4px solid var(--surface);display:flex;align-items:center;justify-content:center;
+  font-size:30px;font-weight:800;color:var(--black);flex-shrink:0;letter-spacing:0;}
+.prof-headtext{flex:1;padding-bottom:6px;min-width:0;}
+.prof-name{font-size:20px;font-weight:800;letter-spacing:-.04em;
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.prof-username{font-size:13px;color:var(--dim);letter-spacing:-.02em;margin-top:2px;}
+.prof-owner-tag{display:inline-flex;align-items:center;gap:4px;
+  padding:3px 10px;border-radius:100px;background:rgba(249,115,22,.12);
+  border:1px solid rgba(249,115,22,.45);color:var(--orange);font-size:10px;
+  font-weight:700;letter-spacing:.06em;text-transform:uppercase;}
+.prof-owner-tag .ms{font-size:13px;}
+.prof-body{padding:24px 28px 28px;}
+.prof-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;
+  background:#1e1e1e;border-radius:14px;overflow:hidden;margin-bottom:22px;}
+.prof-stat{background:var(--surface2);padding:16px 14px;}
+.prof-stat-val{font-size:24px;font-weight:800;letter-spacing:-.05em;color:var(--y);
+  font-variant-numeric:tabular-nums;}
+.prof-stat-key{font-size:10px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--dim2);margin-top:3px;}
+.prof-section-title{font-size:11px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--dim2);margin-bottom:10px;}
+.prof-best-row{display:flex;align-items:center;gap:10px;padding:10px 0;
+  border-bottom:1px solid #141414;}
+.prof-best-row:last-child{border-bottom:none;}
+.prof-best-mode{flex:1;font-size:13px;font-weight:600;letter-spacing:-.02em;
+  display:flex;align-items:center;gap:7px;color:var(--dim);}
+.prof-best-mode .ms{font-size:16px;color:var(--y);}
+.prof-best-val{font-size:16px;font-weight:800;letter-spacing:-.03em;color:var(--y);}
+.prof-empty{text-align:center;padding:24px 0;color:var(--dim2);font-size:13px;}
+.prof-actions{margin-top:22px;}
+.prof-actions .ctrl-btn{width:100%;}
+
+/* ── EDIT PROFILE MODAL ── */
+.edit-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);
+  backdrop-filter:blur(18px);display:flex;align-items:center;justify-content:center;
+  z-index:400;opacity:0;pointer-events:none;transition:opacity .25s;padding:24px;}
+.edit-overlay.show{opacity:1;pointer-events:all;}
+.edit-card{background:var(--surface);border:1.5px solid #202020;border-radius:24px;
+  width:440px;max-width:100%;max-height:88vh;overflow-y:auto;padding:28px;
+  transform:translateY(14px);transition:transform .25s;}
+.edit-overlay.show .edit-card{transform:translateY(0);}
+.edit-card::-webkit-scrollbar{width:4px;}
+.edit-card::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:4px;}
+.edit-title{font-size:18px;font-weight:800;letter-spacing:-.04em;margin-bottom:20px;}
+.edit-banner-wrap{width:100%;height:110px;border-radius:14px;background:#161616;
+  background-size:cover;background-position:center;border:1.5px dashed var(--border2);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  position:relative;margin-bottom:18px;transition:border-color .15s;overflow:hidden;}
+.edit-banner-wrap:hover{border-color:#3a3a3a;}
+.edit-banner-hint{display:flex;align-items:center;gap:6px;font-size:12px;
+  font-weight:600;color:var(--dim);background:rgba(0,0,0,.55);
+  padding:6px 12px;border-radius:100px;backdrop-filter:blur(4px);}
+.edit-banner-hint .ms{font-size:15px;}
+.edit-avatar-row{display:flex;align-items:center;gap:14px;margin-bottom:18px;}
+.edit-avatar-wrap{width:64px;height:64px;border-radius:50%;background:var(--y);
+  background-size:cover;background-position:center;border:1.5px dashed var(--border2);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  flex-shrink:0;font-size:24px;font-weight:800;color:var(--black);transition:border-color .15s;}
+.edit-avatar-wrap:hover{border-color:#3a3a3a;}
+.edit-avatar-info{font-size:13px;color:var(--dim);letter-spacing:-.02em;}
+.edit-avatar-info b{color:var(--white);display:block;font-size:14px;margin-bottom:2px;}
+.edit-actions{display:flex;gap:10px;margin-top:6px;}
+.edit-actions .ctrl-btn{flex:1;}
+.edit-remove-link{display:inline-flex;align-items:center;gap:4px;font-size:11px;
+  color:var(--dim);cursor:pointer;margin-top:6px;letter-spacing:-.02em;}
+.edit-remove-link:hover{color:var(--wrong);}
+.edit-remove-link .ms{font-size:14px;}
+
+/* ── MOBILE NAV BOTTOM BAR (app screen only) ── */
+.mob-nav{display:none;}
+
+@media(max-width:640px){
+  /* ── GLOBAL ── */
+  nav{padding:12px 16px;}
+
+  /* ── LANDING ── */
+  #screen-landing nav{border-bottom:none;padding:14px 16px;}
+  .landing-body{padding:24px 20px 36px;justify-content:flex-start;padding-top:40px;}
+  .landing-tag{font-size:11px;padding:5px 12px;margin-bottom:20px;}
+  .landing-h1{font-size:clamp(38px,11vw,60px);margin-bottom:14px;}
+  .landing-sub{font-size:14px;margin-bottom:28px;}
+  .landing-actions{flex-direction:column;align-items:stretch;gap:10px;margin-bottom:36px;width:100%;max-width:360px;}
+  .btn-xl{justify-content:center;padding:13px 20px;font-size:14px;}
+  .landing-features{gap:16px;}
+  .feat{font-size:12px;}
+  .landing-footer{padding:14px 16px;}
+
+  /* ── AUTH ── */
+  .auth-body{padding:16px;align-items:flex-start;padding-top:24px;}
+  .auth-card{padding:28px 20px;border-radius:20px;width:100%;}
+  .auth-h2{font-size:20px;}
+  .field-row{flex-direction:column;gap:0;}
+  .field input{font-size:16px;} /* 16px prevents iOS zoom */
+
+  /* ── APP NAV ── */
+  #screen-app nav .nav-btn{display:none;} /* hide desktop nav btns */
+  #screen-app nav .app-nav-user span.ms{display:none;} /* hide "person" icon text */
+  #screen-app nav #nav-username{display:none;}
+  #screen-app nav .app-nav-user{padding:0;border:none;background:transparent;gap:0;}
+
+  /* ── MAIN ── */
+  main{padding:16px 14px 80px;} /* 80px bottom for mob nav */
+
+  /* ── STATS BAR ── */
+  .stats-bar{gap:14px;margin-bottom:20px;}
+  .stat-val{font-size:22px;}
+  .stat-label{font-size:9px;}
+  .sdiv{height:24px;}
+  .timer-ring{width:40px;height:40px;}
+  .timer-ring svg{width:40px;height:40px;}
+  .timer-center{font-size:11px;}
+
+  /* ── MODE CHIPS: horizontally scrollable rows ── */
+  .mode-section{margin-bottom:18px;overflow:hidden;}
+  .mode-row{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;padding-bottom:2px;}
+  .mode-row::-webkit-scrollbar{display:none;}
+  .mode-label{display:none;} /* hide labels on mobile to save space */
+  .mode-divider{display:none;}
+
+  /* ── TYPING BOX ── */
+  .typing-box{padding:20px 16px;border-radius:14px;min-height:90px;}
+  .prompt-text{font-size:16px;line-height:1.65;}
+  .typing-wrapper{margin-bottom:16px;}
+  .click-hint{font-size:13px;}
+
+  /* ── CONTROLS ── */
+  .controls{gap:8px;}
+  .ctrl-btn{padding:10px 16px;font-size:13px;}
+  .hint-txt{display:none;} /* hide keyboard hint on mobile */
+
+  /* ── BOTTOM BAR ── */
+  .bottom-bar{display:none;} /* replaced by mob-nav */
+
+  /* ── MOBILE BOTTOM NAV ── */
+  .mob-nav{display:flex;position:fixed;bottom:0;left:0;right:0;
+    background:var(--surface);border-top:1px solid var(--border);
+    z-index:100;padding:8px 0 max(8px,env(safe-area-inset-bottom));
+    gap:0;}
+  .mob-nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;
+    gap:3px;padding:6px 4px;background:transparent;border:none;
+    font-family:'DM Sans',sans-serif;font-size:10px;font-weight:600;
+    letter-spacing:.02em;color:var(--dim2);cursor:pointer;transition:color .15s;}
+  .mob-nav-btn .ms{font-size:22px;transition:color .15s;}
+  .mob-nav-btn.active{color:var(--y);}
+  .mob-nav-btn.active .ms{color:var(--y);}
+  .mob-nav-btn:active{opacity:.7;}
+
+  /* ── RESULT CARD: slides up from bottom on mobile ── */
+  .result-overlay{align-items:flex-end;padding:0;}
+  .result-card{width:100%;max-width:100%;border-radius:24px 24px 0 0;
+    padding:28px 20px max(20px,env(safe-area-inset-bottom));
+    max-height:92vh;transform:translateY(40px);}
+  .result-overlay.show .result-card{transform:translateY(0);}
+  .res-wpm{font-size:56px;}
+  .res-sub{font-size:14px;margin-bottom:20px;}
+
+  /* ── LEADERBOARD: full screen sheet on mobile ── */
+  .lb-overlay{align-items:flex-end;padding:0;}
+  .lb-card{width:100%;max-width:100%;border-radius:24px 24px 0 0;
+    max-height:88vh;transform:translateY(40px);}
+  .lb-overlay.show .lb-card{transform:translateY(0);}
+  .lb-header{padding:20px 20px 16px;}
+  .lb-filters{padding:12px 20px 8px;}
+  .lb-body{padding:0 20px 24px;}
+
+  /* ── CUSTOM PANEL ── */
+  .custom-panel textarea{font-size:16px;}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ LANDING ══════════════ -->
+<div class="screen active" id="screen-landing">
+  <nav>
+    <div class="logo"><span class="ms">keyboard</span>Typex</div>
+    <div class="nav-right">
+      <button class="nav-btn" onclick="showScreen('login')"><span class="ms">login</span>Log in</button>
+      <button class="nav-btn active" onclick="showScreen('signup')"><span class="ms">person_add</span>Sign up</button>
+    </div>
+  </nav>
+
+  <div class="landing-body">
+    <div class="landing-tag"><span class="ms">bolt</span>The fast typing trainer</div>
+    <h1 class="landing-h1">Type faster.<br><span>Get sharper.</span></h1>
+    <p class="landing-sub">Train your typing speed and accuracy with timed tests, word modes, chaos rounds, and more. Track your best scores on the leaderboard.</p>
+    <div class="landing-actions">
+      <button class="btn-xl btn-xl-y" onclick="showScreen('signup')">
+        <span class="ms">person_add</span>Get started free
+      </button>
+      <button class="btn-xl btn-xl-g" onclick="showScreen('login')">
+        <span class="ms">login</span>Log in
+      </button>
+      <button class="btn-xl btn-xl-ghost" onclick="enterAsGuest()">
+        <span class="ms">person</span>Use as guest
+      </button>
+    </div>
+    <div class="landing-features">
+      <div class="feat"><span class="ms">timer</span>Timed modes</div>
+      <div class="feat"><span class="ms">leaderboard</span>Leaderboard</div>
+      <div class="feat"><span class="ms">thunderstorm</span>Chaos mode</div>
+      <div class="feat"><span class="ms">self_improvement</span>Zen mode</div>
+      <div class="feat"><span class="ms">code</span>Code snippets</div>
+    </div>
+  </div>
+
+  <div class="landing-footer">Typex — built for speed</div>
+</div>
+
+<!-- ══════════════ SIGN UP ══════════════ -->
+<div class="screen" id="screen-signup">
+  <nav>
+    <div class="logo" onclick="showScreen('landing')"><span class="ms">keyboard</span>Typex</div>
+    <div class="nav-right">
+      <button class="nav-btn" onclick="showScreen('login')"><span class="ms">login</span>Log in</button>
+    </div>
+  </nav>
+  <div class="auth-body">
+    <div class="auth-card">
+      <div class="auth-icon"><span class="ms">person_add</span></div>
+      <div class="auth-h2">Create account</div>
+      <div class="auth-sub">Already have one? <a onclick="showScreen('login')">Log in</a></div>
+
+      <div class="auth-error" id="signup-error">
+        <span class="ms">error</span><span id="signup-error-msg">Something went wrong.</span>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>First name</label>
+          <input type="text" id="signup-fname" placeholder="Alijah" autocomplete="given-name">
+        </div>
+        <div class="field">
+          <label>Last name</label>
+          <input type="text" id="signup-lname" placeholder="Smith" autocomplete="family-name">
+        </div>
+      </div>
+      <div class="field">
+        <label>Username</label>
+        <input type="text" id="signup-username" placeholder="typexmaster" autocomplete="username" maxlength="20">
+      </div>
+      <div class="field">
+        <label>Email</label>
+        <input type="email" id="signup-email" placeholder="you@example.com" autocomplete="email">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="signup-password" placeholder="At least 8 characters" autocomplete="new-password">
+      </div>
+      <div class="field">
+        <label>Confirm password</label>
+        <input type="password" id="signup-confirm" placeholder="Repeat password" autocomplete="new-password">
+      </div>
+      <div class="edit-banner-wrap" id="signup-banner-wrap" onclick="document.getElementById('signup-banner-input').click()">
+        <div class="edit-banner-hint"><span class="ms">add_photo_alternate</span>Add a profile banner (optional)</div>
+        <input type="file" id="signup-banner-input" accept="image/*" style="display:none" onchange="handleImageInput(this,'signup-banner-wrap','banner')">
+      </div>
+      <div class="edit-avatar-row">
+        <div class="edit-avatar-wrap" id="signup-avatar-wrap" onclick="document.getElementById('signup-avatar-input').click()">
+          <span class="ms">add_a_photo</span>
+          <input type="file" id="signup-avatar-input" accept="image/*" style="display:none" onchange="handleImageInput(this,'signup-avatar-wrap','avatar')">
+        </div>
+        <div class="edit-avatar-info"><b>Profile picture</b>Optional — tap to upload a custom PFP</div>
+      </div>
+      <button class="auth-btn" onclick="doSignup()">
+        <span class="ms">arrow_forward</span>Create account
+      </button>
+      <div class="auth-divider">or</div>
+      <button class="auth-guest" onclick="enterAsGuest()">
+        <span class="ms">person</span>Continue as guest
+      </button>
+      <div class="auth-terms">By signing up you agree to our Terms of Service and Privacy Policy.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ LOG IN ══════════════ -->
+<div class="screen" id="screen-login">
+  <nav>
+    <div class="logo" onclick="showScreen('landing')"><span class="ms">keyboard</span>Typex</div>
+    <div class="nav-right">
+      <button class="nav-btn active" onclick="showScreen('signup')"><span class="ms">person_add</span>Sign up</button>
+    </div>
+  </nav>
+  <div class="auth-body">
+    <div class="auth-card">
+      <div class="auth-icon"><span class="ms">login</span></div>
+      <div class="auth-h2">Welcome back</div>
+      <div class="auth-sub">No account? <a onclick="showScreen('signup')">Sign up</a></div>
+
+      <div class="auth-error" id="login-error">
+        <span class="ms">error</span><span id="login-error-msg">Invalid email or password.</span>
+      </div>
+
+      <div class="field">
+        <label>Email or username</label>
+        <input type="text" id="login-id" placeholder="you@example.com" autocomplete="username">
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="Your password" autocomplete="current-password">
+      </div>
+      <button class="auth-btn" onclick="doLogin()">
+        <span class="ms">arrow_forward</span>Log in
+      </button>
+      <div class="auth-divider">or</div>
+      <button class="auth-guest" onclick="enterAsGuest()">
+        <span class="ms">person</span>Continue as guest
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ APP ══════════════ -->
+<div class="screen" id="screen-app">
+  <nav>
+    <div class="logo" onclick="showScreen('landing')"><span class="ms">keyboard</span>Typex</div>
+    <div class="nav-right">
+      <div class="owner-badge" id="owner-badge"><span class="ms">verified</span>Owner</div>
+      <button class="nav-btn" id="nav-lb-btn" onclick="openLeaderboard()">
+        <span class="ms">leaderboard</span>Leaderboard
+      </button>
+      <button class="nav-btn" id="nav-edit-btn" onclick="openEditProfile()">
+        <span class="ms">edit</span>Edit profile
+      </button>
+      <button class="nav-btn" id="nav-logout-btn" onclick="logout()">
+        <span class="ms">logout</span>Log out
+      </button>
+      <div class="app-nav-user" id="nav-user" onclick="openProfile(currentUser && currentUser.username)" style="cursor:pointer">
+        <span class="ms" style="font-size:16px;color:var(--dim)">person</span>
+        <span id="nav-username">Guest</span>
+        <div class="user-avatar" id="nav-avatar">G</div>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <div class="stats-bar">
+      <div class="stat"><div class="stat-val" id="live-wpm">0</div><div class="stat-label">WPM</div></div>
+      <div class="sdiv"></div>
+      <div class="stat"><div class="stat-val" id="live-acc">—</div><div class="stat-label">Accuracy</div></div>
+      <div class="sdiv"></div>
+      <div class="stat"><div class="stat-val" id="live-streak">0</div><div class="stat-label">Streak</div></div>
+      <div class="spacer"></div>
+      <div class="timer-ring">
+        <svg viewBox="0 0 48 48">
+          <circle class="ring-bg" cx="24" cy="24" r="22"/>
+          <circle class="ring-fg" id="timer-circle" cx="24" cy="24" r="22"/>
+        </svg>
+        <div class="timer-center" id="timer-display">15</div>
+      </div>
+    </div>
+
+    <div class="mode-section">
+      <div class="mode-row">
+        <span class="mode-label">Time</span>
+        <button class="chip active" id="chip-15" onclick="setMode('timed15',this)"><span class="ms">timer</span>15s</button>
+        <button class="chip" id="chip-30" onclick="setMode('timed30',this)"><span class="ms">timer</span>30s</button>
+        <button class="chip" id="chip-60" onclick="setMode('timed60',this)"><span class="ms">timer</span>60s</button>
+        <div class="mode-divider"></div>
+        <span class="mode-label">Words</span>
+        <button class="chip" id="chip-w10" onclick="setMode('words10',this)"><span class="ms">format_list_numbered</span>10</button>
+        <button class="chip" id="chip-w25" onclick="setMode('words25',this)"><span class="ms">format_list_numbered</span>25</button>
+        <button class="chip" id="chip-w50" onclick="setMode('words50',this)"><span class="ms">format_list_numbered</span>50</button>
+        <div class="mode-divider"></div>
+        <button class="chip" id="chip-quote" onclick="setMode('quote',this)"><span class="ms">format_quote</span>Quote</button>
+      </div>
+      <div class="mode-row" style="margin-top:8px;">
+        <span class="mode-label">Special</span>
+        <button class="chip zen-chip" id="chip-zen" onclick="setMode('zen',this)"><span class="ms">self_improvement</span>Zen</button>
+        <button class="chip chaos-chip" id="chip-chaos" onclick="setMode('chaos',this)"><span class="ms">thunderstorm</span>Chaos</button>
+        <button class="chip" id="chip-numbers" onclick="setMode('numbers',this)"><span class="ms">pin</span>Numbers</button>
+        <button class="chip special" id="chip-code" onclick="setMode('code',this)"><span class="ms">code</span>Code</button>
+        <button class="chip custom-chip" id="chip-custom" onclick="setMode('custom',this)"><span class="ms">edit_note</span>Custom</button>
+      </div>
+    </div>
+
+    <div class="custom-panel" id="custom-panel">
+      <textarea id="custom-textarea" placeholder="Paste or type your custom text here, then click Start..." rows="3"></textarea>
+      <div class="custom-panel-footer">
+        <button class="ctrl-btn btn-y" style="padding:9px 18px;font-size:13px;" onclick="applyCustom()">
+          <span class="ms">play_arrow</span>Start with this text
+        </button>
+      </div>
+    </div>
+
+    <div class="typing-wrapper">
+      <div class="typing-box" id="typing-box">
+        <div class="prompt-text" id="prompt-text"></div>
+      </div>
+      <div class="click-hint" id="click-hint" onclick="focusInput()">
+        <span class="ms">touch_app</span>Click to start typing
+      </div>
+    </div>
+
+    <div class="controls">
+      <button class="ctrl-btn btn-y" onclick="restart()"><span class="ms">refresh</span>New test</button>
+      <button class="ctrl-btn btn-g" onclick="skipTest()"><span class="ms">skip_next</span>Skip</button>
+      <div class="hint-txt"><kbd>Esc</kbd> reset &nbsp;·&nbsp; <kbd>Tab</kbd> new</div>
+    </div>
+  </main>
+
+  <div class="bottom-bar">
+    <span id="mode-desc">15 second sprint — type as fast as you can</span>
+    <div class="best-badge"><span class="ms">local_fire_department</span><span id="best-wpm">0</span> best WPM</div>
+  </div>
+
+  <div class="mob-nav">
+    <button class="mob-nav-btn active" id="mob-nav-practice" onclick="mobPractice()"><span class="ms">keyboard</span>Practice</button>
+    <button class="mob-nav-btn" id="mob-nav-lb" onclick="openLeaderboard()"><span class="ms">leaderboard</span>Leaderboard</button>
+  </div>
+</div>
+
+<input id="typing-input" type="text" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+
+<!-- ══════════════ RESULT OVERLAY ══════════════ -->
+<div class="result-overlay" id="result-overlay">
+  <div class="result-card">
+    <div class="res-mode-badge" id="res-mode-badge"><span class="ms">timer</span><span id="res-mode-label">15s</span></div>
+    <div class="res-tag">Test complete</div>
+    <div class="res-wpm" id="res-wpm">0</div>
+    <div class="res-sub" id="res-sub">words per minute</div>
+    <div class="res-zen-note" id="res-zen-note">Zen mode — errors hidden, just flow.</div>
+    <div class="res-grid">
+      <div class="res-metric"><div class="res-metric-val" id="res-acc">—</div><div class="res-metric-key">Accuracy</div></div>
+      <div class="res-metric"><div class="res-metric-val" id="res-ok">0</div><div class="res-metric-key">Correct</div></div>
+      <div class="res-metric"><div class="res-metric-val" id="res-bad">0</div><div class="res-metric-key">Errors</div></div>
+    </div>
+    <div class="res-actions">
+      <button class="ctrl-btn btn-y" onclick="retryTest()"><span class="ms">refresh</span>Try again</button>
+      <button class="ctrl-btn btn-g" onclick="restart()"><span class="ms">skip_next</span>New text</button>
+    </div>
+    <div class="res-lb-notice" id="res-lb-notice">
+      <span class="ms" id="res-lb-notice-icon">leaderboard</span>
+      <span id="res-lb-notice-text"></span>
+    </div>
+    <div class="res-lb-submit-row" id="res-lb-submit-row">
+      <input type="text" id="res-lb-name" placeholder="Your name" maxlength="20" autocomplete="off" autocorrect="off">
+      <button class="ctrl-btn btn-y" onclick="submitScore()" style="font-size:13px;padding:10px 16px;">
+        <span class="ms">upload</span>Submit
+      </button>
+    </div>
+    <div class="res-lb-submitted" id="res-lb-submitted">
+      <span class="ms">check_circle</span>Score submitted to leaderboard!
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ LEADERBOARD OVERLAY ══════════════ -->
+<div class="lb-overlay" id="lb-overlay">
+  <div class="lb-card">
+    <div class="lb-header">
+      <span class="ms" style="font-size:22px;color:var(--y)">leaderboard</span>
+      <div class="lb-title">Typex <span>Leaderboard</span></div>
+      <button class="lb-close" onclick="closeLb()"><span class="ms">close</span></button>
+    </div>
+    <div class="lb-filters">
+      <button class="lb-filter active" onclick="setLbFilter('all',this)">All modes</button>
+      <button class="lb-filter" onclick="setLbFilter('timed15',this)">15s</button>
+      <button class="lb-filter" onclick="setLbFilter('timed30',this)">30s</button>
+      <button class="lb-filter" onclick="setLbFilter('timed60',this)">60s</button>
+      <button class="lb-filter" onclick="setLbFilter('words25',this)">25 words</button>
+      <button class="lb-filter" onclick="setLbFilter('words50',this)">50 words</button>
+      <button class="lb-filter" onclick="setLbFilter('quote',this)">Quote</button>
+      <button class="lb-filter" onclick="setLbFilter('zen',this)">Zen</button>
+      <button class="lb-filter" onclick="setLbFilter('chaos',this)">Chaos</button>
+      <button class="lb-filter" onclick="setLbFilter('code',this)">Code</button>
+    </div>
+    <div class="lb-body" id="lb-body"></div>
+  </div>
+</div>
+
+<!-- ══════════════ PROFILE VIEWER ══════════════ -->
+<div class="prof-overlay" id="prof-overlay">
+  <div class="prof-card">
+    <div class="prof-banner" id="prof-banner">
+      <button class="prof-close" onclick="closeProfile()"><span class="ms">close</span></button>
+    </div>
+    <div class="prof-head">
+      <div class="prof-avatar" id="prof-avatar">?</div>
+      <div class="prof-headtext">
+        <div class="prof-name">
+          <span id="prof-displayname">User</span>
+          <span class="prof-owner-tag" id="prof-owner-tag" style="display:none"><span class="ms">verified</span>Owner</span>
+        </div>
+        <div class="prof-username" id="prof-username">@user</div>
+      </div>
+    </div>
+    <div class="prof-body">
+      <div class="prof-stats">
+        <div class="prof-stat"><div class="prof-stat-val" id="prof-best-overall">0</div><div class="prof-stat-key">Best WPM</div></div>
+        <div class="prof-stat"><div class="prof-stat-val" id="prof-tests">0</div><div class="prof-stat-key">Scores set</div></div>
+        <div class="prof-stat"><div class="prof-stat-val" id="prof-avg-acc">—</div><div class="prof-stat-key">Avg accuracy</div></div>
+      </div>
+      <div class="prof-section-title">Best by mode</div>
+      <div id="prof-bests"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ EDIT PROFILE ══════════════ -->
+<div class="edit-overlay" id="edit-overlay">
+  <div class="edit-card">
+    <div class="edit-title">Edit profile</div>
+    <div class="edit-banner-wrap" id="edit-banner-wrap" onclick="document.getElementById('edit-banner-input').click()">
+      <div class="edit-banner-hint"><span class="ms">add_photo_alternate</span>Change banner</div>
+      <input type="file" id="edit-banner-input" accept="image/*" style="display:none" onchange="handleImageInput(this,'edit-banner-wrap','banner')">
+    </div>
+    <div class="edit-remove-link" onclick="removeImage('banner')"><span class="ms">delete</span>Remove banner</div>
+    <div class="edit-avatar-row" style="margin-top:14px;">
+      <div class="edit-avatar-wrap" id="edit-avatar-wrap" onclick="document.getElementById('edit-avatar-input').click()">
+        <span class="ms">add_a_photo</span>
+        <input type="file" id="edit-avatar-input" accept="image/*" style="display:none" onchange="handleImageInput(this,'edit-avatar-wrap','avatar')">
+      </div>
+      <div class="edit-avatar-info">
+        <b>Profile picture</b>
+        Tap the circle to change it
+        <div class="edit-remove-link" onclick="removeImage('avatar')"><span class="ms">delete</span>Remove PFP</div>
+      </div>
+    </div>
+    <div class="field">
+      <label>Display name</label>
+      <input type="text" id="edit-displayname" placeholder="Your display name" maxlength="30">
+    </div>
+    <div class="edit-actions">
+      <button class="ctrl-btn btn-g" onclick="closeEditProfile()"><span class="ms">close</span>Cancel</button>
+      <button class="ctrl-btn btn-y" onclick="saveEditProfile()"><span class="ms">check</span>Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── SCREEN ROUTING ────────────────────────────────────────────────────────────
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+  if (id === 'app') { init(); focusIfReady(); }
+}
+
+// ── FIREBASE ──────────────────────────────────────────────────────────────────
+// TODO: Replace with your own Firebase project config (Project settings → General → Your apps)
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  databaseURL: "https://YOUR_PROJECT-default-rtdb.firebaseio.com",
+  projectId: "YOUR_PROJECT",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db   = firebase.database();
+
+// ── IMAGE HANDLING (base64, stored in Realtime DB) ───────────────────────────
+// pending images selected during signup, keyed by 'avatar' | 'banner'
+const pendingImages = { avatar: null, banner: null };
+const MAX_IMG_DIM = { avatar: 256, banner: 900 };
+const MAX_IMG_DIM_H = { banner: 300 };
+
+function handleImageInput(inputEl, wrapId, kind) {
+  const file = inputEl.files && inputEl.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      let w = img.width, h = img.height;
+      const maxW = MAX_IMG_DIM[kind] || 512;
+      const maxH = kind === 'banner' ? (MAX_IMG_DIM_H.banner || 300) : maxW;
+      const ratio = Math.min(1, maxW / w, maxH / h);
+      w = Math.max(1, Math.round(w * ratio));
+      h = Math.max(1, Math.round(h * ratio));
+      canvas.width = w; canvas.height = h;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.78);
+      pendingImages[kind] = dataUrl;
+      const wrap = document.getElementById(wrapId);
+      if (wrap) {
+        wrap.style.backgroundImage = `url(${dataUrl})`;
+        wrap.classList.add('has-img');
+        const ms = wrap.querySelector('.ms');
+        if (ms) ms.style.display = 'none';
+        const hint = wrap.querySelector('.edit-banner-hint');
+        if (hint) hint.style.opacity = '0';
+      }
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeImage(kind) {
+  pendingImages[kind] = 'REMOVE';
+  const wrapId = kind === 'avatar' ? 'edit-avatar-wrap' : 'edit-banner-wrap';
+  const wrap = document.getElementById(wrapId);
+  if (wrap) {
+    wrap.style.backgroundImage = '';
+    wrap.classList.remove('has-img');
+    const ms = wrap.querySelector('.ms');
+    if (ms) ms.style.display = '';
+    const hint = wrap.querySelector('.edit-banner-hint');
+    if (hint) hint.style.opacity = '1';
+  }
+}
+
+function setAvatarEl(el, name, photoURL) {
+  if (photoURL && photoURL !== 'REMOVE') {
+    el.style.backgroundImage = `url(${photoURL})`;
+    el.classList.add('has-img');
+    el.textContent = '';
+  } else {
+    el.style.backgroundImage = '';
+    el.classList.remove('has-img');
+    el.textContent = (name || '?').slice(0,1).toUpperCase();
+  }
+}
+
+// ── AUTH (Firebase) ───────────────────────────────────────────────────────────
+let currentUser = null; // { uid, username, email, displayName, guest, photoURL, bannerURL }
+
+function showAuthError(screen, msg) {
+  const el = document.getElementById(screen + '-error');
+  document.getElementById(screen + '-error-msg').textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 4000);
+}
+
+// usernames map: usernames/{usernameLower} -> uid  (for username->email/uid lookup)
+async function usernameTaken(usernameLower) {
+  const snap = await db.ref('usernames/' + usernameLower).get();
+  return snap.exists();
+}
+
+async function doSignup() {
+  const fname    = document.getElementById('signup-fname').value.trim();
+  const lname    = document.getElementById('signup-lname').value.trim();
+  const username = document.getElementById('signup-username').value.trim();
+  const email    = document.getElementById('signup-email').value.trim();
+  const pw       = document.getElementById('signup-password').value;
+  const pw2      = document.getElementById('signup-confirm').value;
+
+  if (!fname || !username || !email || !pw) return showAuthError('signup','Please fill in all fields.');
+  if (pw.length < 8) return showAuthError('signup','Password must be at least 8 characters.');
+  if (pw !== pw2)    return showAuthError('signup','Passwords do not match.');
+  if (!/^[a-zA-Z0-9_]{3,20}$/.test(username)) return showAuthError('signup','Username must be 3-20 chars, letters/numbers/underscore only.');
+
+  const usernameLower = username.toLowerCase();
+  try {
+    if (await usernameTaken(usernameLower)) return showAuthError('signup','That username is already taken.');
+
+    const cred = await auth.createUserWithEmailAndPassword(email.toLowerCase(), pw);
+    const uid = cred.user.uid;
+    const displayName = fname + (lname ? ' ' + lname : '');
+
+    const userData = {
+      username, displayName,
+      email: email.toLowerCase(),
+      createdAt: firebase.database.ServerValue.TIMESTAMP
+    };
+    if (pendingImages.avatar && pendingImages.avatar !== 'REMOVE') userData.photoURL = pendingImages.avatar;
+    if (pendingImages.banner && pendingImages.banner !== 'REMOVE') userData.bannerURL = pendingImages.banner;
+
+    await db.ref('users/' + uid).set(userData);
+    await db.ref('usernames/' + usernameLower).set(uid);
+
+    currentUser = { uid, username, displayName, email: email.toLowerCase(), guest: false,
+      photoURL: userData.photoURL || null, bannerURL: userData.bannerURL || null };
+    pendingImages.avatar = null; pendingImages.banner = null;
+    applyUser();
+    showScreen('app');
+  } catch (err) {
+    showAuthError('signup', friendlyAuthError(err));
+  }
+}
+
+async function doLogin() {
+  const id = document.getElementById('login-id').value.trim();
+  const pw = document.getElementById('login-password').value;
+  if (!id || !pw) return showAuthError('login','Please enter your email/username and password.');
+
+  try {
+    let email = id.toLowerCase();
+    if (!email.includes('@')) {
+      // treat as username — look up uid then email
+      const uidSnap = await db.ref('usernames/' + email).get();
+      if (!uidSnap.exists()) return showAuthError('login','Invalid email/username or password.');
+      const uid = uidSnap.val();
+      const userSnap = await db.ref('users/' + uid).get();
+      if (!userSnap.exists()) return showAuthError('login','Invalid email/username or password.');
+      email = userSnap.val().email;
+    }
+    const cred = await auth.signInWithEmailAndPassword(email, pw);
+    await loadCurrentUserFromDb(cred.user.uid, email);
+    applyUser();
+    showScreen('app');
+  } catch (err) {
+    showAuthError('login', friendlyAuthError(err));
+  }
+}
+
+async function loadCurrentUserFromDb(uid, email) {
+  const snap = await db.ref('users/' + uid).get();
+  const data = snap.exists() ? snap.val() : {};
+  currentUser = {
+    uid, username: data.username || 'user', displayName: data.displayName || data.username || 'User',
+    email: data.email || email, guest: false,
+    photoURL: data.photoURL || null, bannerURL: data.bannerURL || null
+  };
+}
+
+function friendlyAuthError(err) {
+  switch (err.code) {
+    case 'auth/email-already-in-use': return 'An account with that email already exists.';
+    case 'auth/invalid-email': return 'That email address looks invalid.';
+    case 'auth/weak-password': return 'Password must be at least 8 characters.';
+    case 'auth/user-not-found':
+    case 'auth/wrong-password':
+    case 'auth/invalid-credential': return 'Invalid email/username or password.';
+    case 'auth/too-many-requests': return 'Too many attempts. Try again later.';
+    default: return err.message || 'Something went wrong.';
+  }
+}
+
+function enterAsGuest() {
+  currentUser = { username: 'Guest', displayName: 'Guest', guest: true, photoURL: null, bannerURL: null };
+  applyUser();
+  showScreen('app');
+}
+
+function applyUser() {
+  if (!currentUser) return;
+  const name = currentUser.displayName || currentUser.username || 'Guest';
+  document.getElementById('nav-username').textContent = name;
+  setAvatarEl(document.getElementById('nav-avatar'), name, currentUser.photoURL);
+  document.getElementById('owner-badge').classList.toggle('show', currentUser.username === 'alijahpatton');
+  document.getElementById('nav-edit-btn').style.display = currentUser.guest ? 'none' : '';
+  document.getElementById('nav-logout-btn').style.display = currentUser.guest ? 'none' : '';
+  if (!currentUser.guest) {
+    const savedName = getSavedName();
+    if (!savedName) localStorage.setItem(NAME_KEY, currentUser.username);
+  }
+}
+
+// check existing session on load
+auth.onAuthStateChanged(async user => {
+  if (user && (!currentUser || currentUser.guest)) {
+    await loadCurrentUserFromDb(user.uid, user.email);
+    applyUser();
+    if (!document.getElementById('screen-app').classList.contains('active')) {
+      showScreen('app');
+    } else {
+      applyUser();
+    }
+  }
+});
+
+function logout() {
+  auth.signOut().catch(()=>{});
+  currentUser = null;
+  clearSession();
+  showScreen('landing');
+}
+function clearSession(){} // kept for compatibility; session now handled by Firebase Auth persistence
+
+// ── EDIT PROFILE ─────────────────────────────────────────────────────────────
+function openEditProfile() {
+  if (!currentUser || currentUser.guest) return;
+  document.getElementById('edit-displayname').value = currentUser.displayName || '';
+  const bWrap = document.getElementById('edit-banner-wrap');
+  const aWrap = document.getElementById('edit-avatar-wrap');
+  pendingImages.avatar = null; pendingImages.banner = null;
+  if (currentUser.bannerURL) {
+    bWrap.style.backgroundImage = `url(${currentUser.bannerURL})`;
+    bWrap.classList.add('has-img');
+    bWrap.querySelector('.edit-banner-hint').style.opacity = '0';
+  } else {
+    bWrap.style.backgroundImage = '';
+    bWrap.classList.remove('has-img');
+    bWrap.querySelector('.edit-banner-hint').style.opacity = '1';
+  }
+  if (currentUser.photoURL) {
+    aWrap.style.backgroundImage = `url(${currentUser.photoURL})`;
+    aWrap.classList.add('has-img');
+    aWrap.querySelector('.ms').style.display = 'none';
+  } else {
+    aWrap.style.backgroundImage = '';
+    aWrap.classList.remove('has-img');
+    aWrap.querySelector('.ms').style.display = '';
+  }
+  document.getElementById('edit-overlay').classList.add('show');
+}
+function closeEditProfile() {
+  document.getElementById('edit-overlay').classList.remove('show');
+}
+async function saveEditProfile() {
+  if (!currentUser || currentUser.guest) return;
+  const displayName = document.getElementById('edit-displayname').value.trim() || currentUser.displayName;
+  const updates = { displayName };
+
+  if (pendingImages.avatar === 'REMOVE') updates.photoURL = null;
+  else if (pendingImages.avatar) updates.photoURL = pendingImages.avatar;
+
+  if (pendingImages.banner === 'REMOVE') updates.bannerURL = null;
+  else if (pendingImages.banner) updates.bannerURL = pendingImages.banner;
+
+  try {
+    await db.ref('users/' + currentUser.uid).update(updates);
+    currentUser.displayName = displayName;
+    if ('photoURL' in updates) currentUser.photoURL = updates.photoURL;
+    if ('bannerURL' in updates) currentUser.bannerURL = updates.bannerURL;
+    pendingImages.avatar = null; pendingImages.banner = null;
+    applyUser();
+    closeEditProfile();
+  } catch (err) {
+    alert('Could not save profile: ' + (err.message || err));
+  }
+}
+
+// ── PROFILE VIEWER ───────────────────────────────────────────────────────────
+async function openProfile(usernameOrUid) {
+  if (!usernameOrUid) return;
+  const overlay = document.getElementById('prof-overlay');
+  // reset
+  document.getElementById('prof-displayname').textContent = 'Loading…';
+  document.getElementById('prof-username').textContent = '';
+  document.getElementById('prof-banner').style.backgroundImage = '';
+  document.getElementById('prof-owner-tag').style.display = 'none';
+  document.getElementById('prof-bests').innerHTML = '';
+  document.getElementById('prof-best-overall').textContent = '0';
+  document.getElementById('prof-tests').textContent = '0';
+  document.getElementById('prof-avg-acc').textContent = '—';
+  overlay.classList.add('show');
+
+  try {
+    let uid = usernameOrUid;
+    let userData = null;
+
+    if (currentUser && (usernameOrUid === currentUser.username || usernameOrUid === currentUser.uid)) {
+      uid = currentUser.uid;
+      userData = currentUser.guest ? null : {
+        username: currentUser.username, displayName: currentUser.displayName,
+        photoURL: currentUser.photoURL, bannerURL: currentUser.bannerURL
+      };
+    }
+
+    if (!userData) {
+      // try username lookup
+      const unameSnap = await db.ref('usernames/' + String(usernameOrUid).toLowerCase()).get();
+      if (unameSnap.exists()) {
+        uid = unameSnap.val();
+        const userSnap = await db.ref('users/' + uid).get();
+        if (userSnap.exists()) userData = userSnap.val();
+      } else {
+        // maybe it's already a uid
+        const userSnap = await db.ref('users/' + uid).get();
+        if (userSnap.exists()) userData = userSnap.val();
+      }
+    }
+
+    if (!userData) {
+      // Guest / no account on record — show minimal local-only view from leaderboard entries
+      userData = { username: usernameOrUid, displayName: usernameOrUid };
+    }
+
+    const name = userData.displayName || userData.username || 'User';
+    document.getElementById('prof-displayname').textContent = name;
+    document.getElementById('prof-username').textContent = '@' + (userData.username || usernameOrUid);
+    setAvatarEl(document.getElementById('prof-avatar'), name, userData.photoURL);
+    if (userData.bannerURL) document.getElementById('prof-banner').style.backgroundImage = `url(${userData.bannerURL})`;
+    document.getElementById('prof-owner-tag').style.display = (userData.username === 'alijahpatton') ? 'flex' : 'none';
+
+    renderProfileStats(userData.username || usernameOrUid);
+  } catch (err) {
+    document.getElementById('prof-displayname').textContent = 'Could not load profile';
+  }
+}
+
+function renderProfileStats(username) {
+  const entries = loadLb().filter(e => e.name === username);
+  document.getElementById('prof-tests').textContent = entries.length;
+
+  if (entries.length === 0) {
+    document.getElementById('prof-bests').innerHTML = '<div class="prof-empty">No leaderboard scores yet.</div>';
+    return;
+  }
+
+  let bestOverall = 0;
+  let accSum = 0, accCount = 0;
+  const byMode = {};
+  entries.forEach(e => {
+    if (e.wpm > bestOverall) bestOverall = e.wpm;
+    if (typeof e.acc === 'number') { accSum += e.acc; accCount++; }
+    else if (typeof e.acc === 'string' && e.acc.endsWith('%')) { accSum += parseInt(e.acc); accCount++; }
+    if (!byMode[e.mode] || e.wpm > byMode[e.mode].wpm) byMode[e.mode] = e;
+  });
+
+  document.getElementById('prof-best-overall').textContent = bestOverall;
+  document.getElementById('prof-avg-acc').textContent = accCount ? Math.round(accSum/accCount) + '%' : '—';
+
+  const sorted = Object.values(byMode).sort((a,b) => b.wpm - a.wpm);
+  document.getElementById('prof-bests').innerHTML = sorted.map(e => {
+    const m = MODES[e.mode] || { label: e.mode, icon: 'bolt' };
+    return `<div class="prof-best-row">
+      <div class="prof-best-mode"><span class="ms">${m.icon}</span>${m.label}</div>
+      <div class="prof-best-val">${e.wpm} wpm</div>
+    </div>`;
+  }).join('');
+}
+
+function closeProfile() {
+  document.getElementById('prof-overlay').classList.remove('show');
+}
+
+// ── PROMPTS ───────────────────────────────────────────────────────────────────
+const QUOTES = [
+  "the quick brown fox jumps over the lazy dog and keeps on running through the open field at full speed",
+  "all great achievements require time and consistent effort every single day without exception or compromise",
+  "code is like humor when you have to explain it it is not that good anymore so keep it clean and simple",
+  "typing fast is not about speed it is about accuracy and building muscle memory over a long period of time",
+  "the best way to predict the future is to invent it one keystroke and one idea at a time every single day",
+  "practice makes permanent not perfect so always practice with full intention and deliberate focus every session",
+  "every expert was once a beginner who refused to give up on the thing they truly loved doing day after day",
+  "the internet is a world passing in and out of your window at the speed of light and thought combined",
+  "simplicity is the ultimate sophistication and removing clutter always reveals the true elegant form beneath",
+  "a good developer writes code that humans can read and understand not just machines that can execute it fast",
+  "the sun had not yet risen but the keys were already singing their quiet and familiar morning song for hours",
+  "dark themes and yellow highlights make late night coding sessions a lot more tolerable and even enjoyable",
+  "speed without direction is just noise but direction without speed gets nothing shipped into the real world",
+  "the keyboard is an instrument and every great typist is playing their own kind of music with it every day",
+  "consistency beats intensity every single time when it comes to building real and lasting skills over months",
+  "the words we type reveal the thoughts we carry and the speed at which we type reveals our discipline level",
+  "focus is the rarest and most valuable resource in a world designed to steal your attention every single second",
+  "a clean workspace leads to a clear mind and a clear mind leads to faster and more accurate typing every time",
+];
+
+const WORD_LIST = [
+  "the","be","to","of","and","a","in","that","have","it","for","not","on","with","he","as","you","do","at","this",
+  "but","his","by","from","they","we","say","her","she","or","an","will","my","one","all","would","there","their",
+  "what","so","up","out","if","about","who","get","which","go","me","when","make","can","like","time","no","just",
+  "him","know","take","people","into","year","your","good","some","could","them","see","other","than","then","now",
+  "look","only","come","its","over","think","also","back","after","use","two","how","our","work","first","well",
+  "way","even","new","want","because","any","these","give","day","most","us","great","between","need","large","often",
+];
+
+const CODE_SNIPPETS = [
+  "const greet = name => `hello ${name}` console.log(greet('world')) const bye = name => `goodbye ${name}`",
+  "function add(a, b) { return a + b } function multiply(a, b) { return a * b } const result = add(3, 7)",
+  "let arr = [1, 2, 3, 4, 5] let doubled = arr.map(x => x * 2) let evens = arr.filter(x => x % 2 === 0)",
+  "for (let i = 0; i < 10; i++) { if (i % 2 === 0) console.log(i) } console.log('loop complete and done')",
+  "const fetchData = async url => { const res = await fetch(url) const data = await res.json() return data }",
+  "class Node { constructor(val) { this.val = val this.next = null } } class LinkedList { constructor() {} }",
+  "const obj = { name: 'typex', speed: 100, active: true } const keys = Object.keys(obj) console.log(keys)",
+  "while (queue.length > 0) { const item = queue.shift() process(item) } console.log('queue fully drained')",
+  "import { useState, useEffect } from 'react' export default function App() { const [v, setV] = useState(0) }",
+  "type User = { id: number name: string email: string role: 'admin' | 'user' } const users: User[] = []",
+];
+
+function randWords(count) {
+  let out = [];
+  for (let i = 0; i < count; i++) out.push(WORD_LIST[Math.floor(Math.random() * WORD_LIST.length)]);
+  return out.join(' ');
+}
+
+function randNumbers(count) {
+  let out = [];
+  for (let i = 0; i < count; i++) out.push(String(Math.floor(Math.random() * 9000) + 1000));
+  return out.join(' ');
+}
+
+// ── MODES ─────────────────────────────────────────────────────────────────────
+const MODES = {
+  timed15: { label:'15s',      icon:'timer',                desc:'15 second sprint — type as fast as you can' },
+  timed30: { label:'30s',      icon:'timer',                desc:'30 second burst — find your rhythm' },
+  timed60: { label:'60s',      icon:'timer',                desc:'60 second run — pace yourself' },
+  words10: { label:'10 words', icon:'format_list_numbered', desc:'10 words — quick reflex check' },
+  words25: { label:'25 words', icon:'format_list_numbered', desc:'25 words — short and sharp' },
+  words50: { label:'50 words', icon:'format_list_numbered', desc:'50 words — sustained focus' },
+  quote:   { label:'Quote',    icon:'format_quote',         desc:'Finish the full quote — no time limit' },
+  zen:     { label:'Zen',      icon:'self_improvement',     desc:'Zen mode — errors hidden, just flow' },
+  chaos:   { label:'Chaos',    icon:'thunderstorm',         desc:'Chaos — text scrambles every few seconds' },
+  numbers: { label:'Numbers',  icon:'pin',                  desc:'Numbers only — train your number row' },
+  code:    { label:'Code',     icon:'code',                 desc:'Code snippets — symbols and syntax' },
+  custom:  { label:'Custom',   icon:'edit_note',            desc:'Your own text — paste anything' },
+};
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let mode        = 'timed15';
+let chars       = [];
+let currentText = '';
+let customText  = '';
+let startTime   = null;
+let running     = false;
+let finished    = false;
+let timeLeft    = 15;
+let totalTime   = 15;
+let okCount     = 0;
+let badCount    = 0;
+let streak      = 0;
+let bestWpm     = 0;
+let tickInt     = null;
+let countInt    = null;
+let chaosInt    = null;
+const CIRC      = 2 * Math.PI * 22;
+
+// ── DOM ───────────────────────────────────────────────────────────────────────
+const promptEl   = document.getElementById('prompt-text');
+const inputEl    = document.getElementById('typing-input');
+const hintEl     = document.getElementById('click-hint');
+const boxEl      = document.getElementById('typing-box');
+const timerDisp  = document.getElementById('timer-display');
+const timerCirc  = document.getElementById('timer-circle');
+const liveWpm    = document.getElementById('live-wpm');
+const liveAcc    = document.getElementById('live-acc');
+const liveStrk   = document.getElementById('live-streak');
+const resOverlay = document.getElementById('result-overlay');
+const customPanel= document.getElementById('custom-panel');
+const customTA   = document.getElementById('custom-textarea');
+const modeDesc   = document.getElementById('mode-desc');
+
+// ── TEXT GEN ──────────────────────────────────────────────────────────────────
+function generateText() {
+  switch(mode) {
+    case 'timed15': case 'timed30': case 'timed60':
+      return QUOTES[Math.floor(Math.random() * QUOTES.length)];
+    case 'words10': return randWords(10);
+    case 'words25': return randWords(25);
+    case 'words50': return randWords(50);
+    case 'quote':   return QUOTES[Math.floor(Math.random() * QUOTES.length)];
+    case 'zen':     return QUOTES[Math.floor(Math.random() * QUOTES.length)];
+    case 'chaos':   return randWords(40);
+    case 'numbers': return randNumbers(20);
+    case 'code':    return CODE_SNIPPETS[Math.floor(Math.random() * CODE_SNIPPETS.length)];
+    case 'custom':  return customText || 'Enter your custom text above and click Start.';
+    default:        return QUOTES[Math.floor(Math.random() * QUOTES.length)];
+  }
+}
+
+// ── BUILD ─────────────────────────────────────────────────────────────────────
+function buildChars(text) {
+  promptEl.innerHTML = '';
+  chars = [];
+  for (let i = 0; i < text.length; i++) {
+    const s = document.createElement('span');
+    s.className = 'ch' + (i === 0 ? ' cur' : '');
+    s.textContent = text[i];
+    promptEl.appendChild(s);
+    chars.push({ exp: text[i], typed: null, el: s });
+  }
+}
+
+function cursorIdx() {
+  for (let i = 0; i < chars.length; i++) { if (chars[i].typed === null) return i; }
+  return chars.length;
+}
+
+function moveCursor(idx) {
+  chars.forEach(c => c.el.classList.remove('cur'));
+  if (idx < chars.length) chars[idx].el.classList.add('cur');
+  boxEl.style.setProperty('--progress', chars.length ? idx / chars.length : 0);
+}
+
+function applyBoxMode() {
+  boxEl.classList.remove('zen-mode','chaos-mode','numbers-mode');
+  if (mode === 'zen')     boxEl.classList.add('zen-mode');
+  if (mode === 'chaos')   boxEl.classList.add('chaos-mode');
+  if (mode === 'numbers') boxEl.classList.add('numbers-mode');
+}
+
+// ── CHAOS ─────────────────────────────────────────────────────────────────────
+function chaosScramble() {
+  if (finished || !running) return;
+  const idx = cursorIdx();
+  for (let i = idx; i < chars.length; i++) {
+    if (chars[i].typed === null) {
+      const cands = [];
+      for (let j = i+1; j < chars.length; j++) {
+        if (chars[j].typed === null && chars[j].exp !== ' ' && chars[i].exp !== ' ') cands.push(j);
+      }
+      if (cands.length > 0) {
+        const j = cands[Math.floor(Math.random() * cands.length)];
+        const tmp = chars[i].el.textContent; chars[i].el.textContent = chars[j].el.textContent; chars[j].el.textContent = tmp;
+        const tmpE = chars[i].exp; chars[i].exp = chars[j].exp; chars[j].exp = tmpE;
+        chars[i].el.classList.add('scrambled'); chars[j].el.classList.add('scrambled');
+        setTimeout(() => { chars[i].el.classList.remove('scrambled'); chars[j].el.classList.remove('scrambled'); }, 300);
+      }
+    }
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+function init() {
+  clearInterval(tickInt); clearInterval(countInt); clearInterval(chaosInt);
+  currentText = generateText();
+  buildChars(currentText);
+  applyBoxMode();
+  inputEl.value = '';
+  startTime = null; running = false; finished = false;
+  okCount = 0; badCount = 0; streak = 0;
+  liveWpm.textContent = '0'; liveAcc.textContent = '—'; liveStrk.textContent = '0';
+  boxEl.style.setProperty('--progress', 0);
+  boxEl.classList.remove('focused');
+  hintEl.classList.remove('gone');
+  resOverlay.classList.remove('show');
+  modeDesc.textContent = MODES[mode].desc;
+
+  const timed = ['timed15','timed30','timed60'].includes(mode);
+  if (timed) {
+    const secs = mode === 'timed15' ? 15 : mode === 'timed30' ? 30 : 60;
+    timeLeft = secs; totalTime = secs;
+    timerDisp.textContent = secs;
+    timerCirc.style.transition = 'none';
+    timerCirc.style.strokeDasharray = CIRC;
+    timerCirc.style.strokeDashoffset = 0;
+  } else {
+    timerDisp.textContent = '—';
+    timerCirc.style.strokeDashoffset = CIRC;
+    timerCirc.style.strokeDasharray = CIRC;
+  }
+}
+
+function focusInput() {
+  inputEl.focus();
+  hintEl.classList.add('gone');
+  boxEl.classList.add('focused');
+}
+
+function focusIfReady() {
+  // don't auto-focus on mobile
+  if (window.innerWidth > 640) setTimeout(() => focusInput(), 100);
+}
+
+boxEl.addEventListener('click', focusInput);
+
+// ── START ─────────────────────────────────────────────────────────────────────
+function startGame() {
+  startTime = Date.now(); running = true;
+  const timed = ['timed15','timed30','timed60'].includes(mode);
+  if (timed) {
+    requestAnimationFrame(() => {
+      timerCirc.style.transition = `stroke-dashoffset ${timeLeft}s linear`;
+      timerCirc.style.strokeDashoffset = CIRC;
+    });
+    countInt = setInterval(() => {
+      timeLeft--;
+      timerDisp.textContent = timeLeft;
+      if (timeLeft <= 0) { clearInterval(countInt); finishTest(); }
+    }, 1000);
+  }
+  if (mode === 'chaos') chaosInt = setInterval(chaosScramble, 2200);
+  tickInt = setInterval(() => {
+    if (!running) return;
+    const elapsed = (Date.now() - startTime) / 60000;
+    liveWpm.textContent = elapsed > 0 ? Math.round((okCount / 5) / elapsed) : 0;
+    const tot = okCount + badCount;
+    if (tot > 0) liveAcc.textContent = Math.round((okCount / tot) * 100) + '%';
+  }, 250);
+}
+
+// ── KEYDOWN ───────────────────────────────────────────────────────────────────
+inputEl.addEventListener('keydown', e => {
+  if (finished) { if (e.key === 'Escape') restart(); return; }
+  if (e.key === 'Escape') { restart(); return; }
+  if (e.key === 'Tab')    { e.preventDefault(); restart(); return; }
+
+  if (e.key === 'Backspace') {
+    e.preventDefault();
+    if (mode === 'chaos') return;
+    const idx = cursorIdx();
+    if (idx > 0) {
+      const prev = idx - 1;
+      if (chars[prev].el.classList.contains('ok')) okCount = Math.max(0, okCount - 1);
+      else badCount = Math.max(0, badCount - 1);
+      chars[prev].typed = null;
+      chars[prev].el.className = 'ch';
+      moveCursor(prev);
+    }
+    return;
+  }
+
+  if (e.key.length === 1) {
+    e.preventDefault();
+    if (finished) return;
+    const idx = cursorIdx();
+    if (idx >= chars.length) return;
+    if (!running) startGame();
+
+    const good = e.key === chars[idx].exp;
+    chars[idx].typed = e.key;
+    if (mode === 'zen') {
+      chars[idx].el.className = 'ch ok';
+      okCount++; streak++;
+    } else {
+      chars[idx].el.className = 'ch ' + (good ? 'ok' : 'bad');
+      if (good) { okCount++; streak++; }
+      else { badCount++; streak = 0; if (mode === 'chaos') chars[idx].el.classList.add('shake'); }
+    }
+    liveStrk.textContent = streak;
+    moveCursor(idx + 1);
+    if (idx + 1 >= chars.length) finishTest();
+  }
+});
+
+inputEl.addEventListener('blur', () => {
+  if (!finished) { hintEl.classList.remove('gone'); boxEl.classList.remove('focused'); }
+});
+
+// ── LEADERBOARD (Firebase Realtime Database) ─────────────────────────────────
+const NAME_KEY = 'typex_name';
+const LB_EXCLUDED = new Set(['custom','numbers','words10']);
+
+function lbEligible() { return !LB_EXCLUDED.has(mode); }
+function getSavedName() { return localStorage.getItem(NAME_KEY) || ''; }
+
+// local cache of scores, kept in sync with db.ref('scores')
+let lbCache = [];
+let lbProfileCache = {}; // username -> {photoURL, displayName}
+
+function loadLb() { return lbCache; }
+
+db.ref('scores').limitToLast(500).on('value', snap => {
+  const out = [];
+  snap.forEach(child => {
+    const v = child.val();
+    out.push({ ...v, key: child.key });
+  });
+  lbCache = out;
+  renderLb();
+});
+
+let lbFilter = 'all';
+let lastScore = null;
+
+function openLeaderboard() { renderLb(); document.getElementById('lb-overlay').classList.add('show'); setMobNavActive('mob-nav-lb'); }
+function closeLb() { document.getElementById('lb-overlay').classList.remove('show'); setMobNavActive('mob-nav-practice'); }
+
+function setMobNavActive(id) {
+  document.querySelectorAll('.mob-nav-btn').forEach(b => b.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+}
+
+function mobPractice() {
+  document.getElementById('lb-overlay').classList.remove('show');
+  setMobNavActive('mob-nav-practice');
+  focusInput();
+}
+
+function setLbFilter(f, btn) {
+  lbFilter = f;
+  document.querySelectorAll('.lb-filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderLb();
+}
+
+async function fetchLbAvatars(usernames) {
+  const missing = usernames.filter(u => !(u in lbProfileCache));
+  await Promise.all(missing.map(async u => {
+    try {
+      const unameSnap = await db.ref('usernames/' + u.toLowerCase()).get();
+      if (!unameSnap.exists()) { lbProfileCache[u] = null; return; }
+      const uid = unameSnap.val();
+      const userSnap = await db.ref('users/' + uid).get();
+      lbProfileCache[u] = userSnap.exists() ? userSnap.val() : null;
+    } catch { lbProfileCache[u] = null; }
+  }));
+}
+
+function renderLb() {
+  const body = document.getElementById('lb-body');
+  let entries = loadLb().slice();
+  if (lbFilter !== 'all') entries = entries.filter(e => e.mode === lbFilter);
+  entries.sort((a,b) => b.wpm - a.wpm);
+  entries = entries.slice(0, 100);
+
+  if (entries.length === 0) {
+    body.innerHTML = `<div class="lb-empty"><span class="ms">emoji_events</span>No scores yet${lbFilter !== 'all' ? ' for this mode' : ''}.<br>Complete a test to get on the board!</div>`;
+    return;
+  }
+
+  const savedName = getSavedName();
+  const rankIcons = ['#1','#2','#3'];
+  body.innerHTML = entries.map((e, i) => {
+    const rank = i + 1;
+    const rankClass = rank === 1 ? 'gold' : rank === 2 ? 'silver' : rank === 3 ? 'bronze' : '';
+    const rankDisp = rank <= 3 ? rankIcons[rank-1] : rank;
+    const initials = e.name.slice(0,2).toUpperCase();
+    const isYou = e.name === savedName && lastScore && e.ts === lastScore.ts;
+    const modeLabel = MODES[e.mode] ? MODES[e.mode].label : e.mode;
+    const date = new Date(e.ts).toLocaleDateString(undefined, {month:'short', day:'numeric'});
+    const prof = lbProfileCache[e.name];
+    const photoURL = prof && prof.photoURL;
+    const avatarStyle = photoURL ? ` style="background-image:url(${photoURL})"` : '';
+    const avatarClass = photoURL ? ' has-img' : '';
+    return `<div class="lb-row" onclick="openProfile('${escHtml(e.name).replace(/'/g,"\\'")}')">
+      <div class="lb-rank ${rankClass}">${rankDisp}</div>
+      <div class="lb-avatar${avatarClass}"${avatarStyle}>${photoURL ? '' : initials}</div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:6px">
+          <div class="lb-name">${escHtml(e.name)}</div>
+          ${isYou ? '<div class="lb-you">you</div>' : ''}
+        </div>
+        <div class="lb-meta">${modeLabel} · ${e.chars} chars · ${date}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="lb-wpm">${e.wpm}</div>
+        <div class="lb-wpm-label">wpm</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // fetch avatars for any unresolved profiles, then re-render once cached
+  const names = [...new Set(entries.map(e => e.name))];
+  const unresolved = names.filter(n => !(n in lbProfileCache));
+  if (unresolved.length) {
+    fetchLbAvatars(unresolved).then(() => renderLb());
+  }
+}
+
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+async function submitScore() {
+  const nameInput = document.getElementById('res-lb-name');
+  const name = nameInput.value.trim();
+  if (!name) { nameInput.focus(); nameInput.style.borderColor='#f33'; setTimeout(()=>nameInput.style.borderColor='',800); return; }
+  if (!lastScore) return;
+  localStorage.setItem(NAME_KEY, name);
+  try {
+    await db.ref('scores').push({ ...lastScore, name });
+    document.getElementById('res-lb-submit-row').classList.remove('show');
+    document.getElementById('res-lb-notice').style.display = 'none';
+    document.getElementById('res-lb-submitted').classList.add('show');
+  } catch (err) {
+    alert('Could not submit score: ' + (err.message || err));
+  }
+}
+
+// ── FINISH ────────────────────────────────────────────────────────────────────
+function finishTest() {
+  if (finished) return;
+  finished = true; running = false;
+  clearInterval(tickInt); clearInterval(countInt); clearInterval(chaosInt);
+
+  const elapsed = startTime ? (Date.now() - startTime) / 60000 : 0.001;
+  const wpm = Math.round((okCount / 5) / elapsed);
+  const tot = okCount + badCount;
+  const acc = mode === 'zen' ? '—' : (tot > 0 ? Math.round((okCount / tot) * 100) + '%' : '100%');
+
+  if (wpm > bestWpm) { bestWpm = wpm; document.getElementById('best-wpm').textContent = bestWpm; }
+
+  const m = MODES[mode];
+  document.getElementById('res-wpm').textContent = wpm;
+  document.getElementById('res-acc').textContent = acc;
+  document.getElementById('res-ok').textContent  = okCount;
+  document.getElementById('res-bad').textContent = badCount;
+  document.getElementById('res-mode-label').textContent = m.label;
+  document.querySelector('#res-mode-badge .ms').textContent = m.icon;
+  document.getElementById('res-zen-note').className = 'res-zen-note' + (mode === 'zen' ? ' show' : '');
+
+  lastScore = { wpm, acc, mode, chars: currentText.length, ts: Date.now() };
+
+  const noticeEl   = document.getElementById('res-lb-notice');
+  const noticeIcon = document.getElementById('res-lb-notice-icon');
+  const noticeTxt  = document.getElementById('res-lb-notice-text');
+  const submitRow  = document.getElementById('res-lb-submit-row');
+  const submitted  = document.getElementById('res-lb-submitted');
+
+  noticeEl.style.display = '';
+  submitRow.classList.remove('show');
+  submitted.classList.remove('show');
+
+  if (lbEligible()) {
+    noticeEl.className = 'res-lb-notice eligible';
+    noticeIcon.textContent = 'leaderboard';
+    noticeTxt.textContent = 'This score qualifies for the leaderboard!';
+    submitRow.classList.add('show');
+    const savedName = currentUser && !currentUser.guest ? currentUser.username : getSavedName();
+    if (savedName) document.getElementById('res-lb-name').value = savedName;
+  } else {
+    noticeEl.className = 'res-lb-notice ineligible';
+    noticeIcon.textContent = 'block';
+    noticeTxt.textContent = `${m.label} mode scores don't count for the leaderboard.`;
+  }
+
+  setTimeout(() => resOverlay.classList.add('show'), 280);
+}
+
+// ── RESTART / CONTROLS ────────────────────────────────────────────────────────
+function restart() { resOverlay.classList.remove('show'); init(); }
+
+function retryTest() {
+  resOverlay.classList.remove('show');
+  const saved = currentText;
+  init();
+  currentText = saved;
+  buildChars(saved);
+}
+
+function skipTest() { restart(); }
+
+function setMode(m, btn) {
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  mode = m;
+  customPanel.classList.toggle('show', m === 'custom');
+  if (m !== 'custom') restart();
+}
+
+function applyCustom() {
+  const txt = customTA.value.trim();
+  if (!txt) { customTA.focus(); return; }
+  customText = txt;
+  customPanel.classList.remove('show');
+  restart();
+}
+
+// ── KEYBOARD SHORTCUTS ────────────────────────────────────────────────────────
+let tabHeld = false;
+document.addEventListener('keydown', e => {
+  if (e.key === 'Tab') tabHeld = true;
+  if (e.key === 'Enter' && tabHeld) { e.preventDefault(); restart(); }
+});
+document.addEventListener('keyup', e => { if (e.key === 'Tab') tabHeld = false; });
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+// Firebase's onAuthStateChanged (above) handles restoring a logged-in session
+// and routing to the app screen automatically. Until that resolves, show landing.
+showScreen('landing');
+
+</script>
+</body>
+  </html>
